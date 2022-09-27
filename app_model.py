@@ -47,4 +47,4 @@ def retrain():
     return "New model retrained and saved as advertising_model_v1. The results of MAE with cross validation of 10 folds is: " + str(abs(round(scores.mean(),2)))
 
 
-app.run()
+# app.run() ## NO SE USA PARA PYTHON ANYWHERE
