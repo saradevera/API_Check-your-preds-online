@@ -12,7 +12,7 @@ app.config['DEBUG'] = True
 
 @app.route("/", methods=['GET'])
 def hello():
-    return "Bienvenid@ a la API predictora #U+1F52E. Chequea las ventas que se alcanzarán este año según las inversiones en TV, radio y newspaper."
+    return "Bienvenid@ a la API predictora U001F52E. Chequea las ventas que se alcanzarán este año según las inversiones en TV, radio y newspaper."
 
 # 1. Crea un endpoint que devuelva la predicción de los nuevos datos enviados mediante argumentos en la llamada
 @app.route('/v1/predict', methods=['GET'])
