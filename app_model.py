@@ -88,9 +88,12 @@ def retrain():
         cursor = connection.cursor()
         cursor.execute(query)
         ans = cursor.fetchall()
+        connection.commit()
+
         names = [description[0] for description in cursor.description]
 
         return pd.DataFrame(ans,columns=names)
+
     df = sql_query('''SELECT * FROM datos''')
 
     print(df)
@@ -101,7 +104,8 @@ def retrain():
     model = pickle.load(open('data/advertising_model','rb'))
     model.fit(X,y)
 
-    pickle.dump(model, open('data/advertising_model_v1','wb'))
+    # pickle.dump(model, open('data/advertising_model_v1','wb'))
 
-    return print('Has reentrenado el modelo con últimos datos añadidos. \n\nCaracterísticas del modelo: ' + str(model))
+    # return print('Has reentrenado el modelo con últimos datos añadidos. \n\nCaracterísticas del modelo: ' + str(model))
+    return jsonify(model)
 
