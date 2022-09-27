@@ -13,46 +13,48 @@ app.config['DEBUG'] = True
 
 @app.route("/", methods=['GET'])
 def hello():
-    return "Bienvenid@ a la API predictora U0001F52E. Chequea las ventas que se alcanzarán este año según las inversiones en TV, radio y newspaper."
+    return "Bienvenid@ a la API predictora \U0001F52E. Chequea las ventas que se alcanzarán este año según las inversiones en TV, radio y newspaper."
 
-# 1. Crea un endpoint que devuelva la predicción de los nuevos datos enviados mediante argumentos en la llamada
-@app.route('/v1/predict', methods=['GET'])
+# 1. Ofrezca la predicción de ventas a partir de todos los valores de gastos en publicidad. (/predict)
+@app.route('/predict', methods=['GET'])
 def predict():
-    model = pickle.load(open('data/advertising_model','rb'))
-   
-    def sql_query(query):
-        connection = sqlite3.connect('advertising.db')
-        cursor = connection.cursor()
-        cursor.execute(query)
-        ans = cursor.fetchall()
-        names = [description[0] for description in cursor.description]
+    # cargamos el modelo
+    my_model = pickle.load(open('data.advertising_model', 'rb')) # SE PUEDE METER EN LA MISMA LINEA
 
-        return pd.DataFrame(ans,columns=names)
+    # convertimos los datos de la llamada en test
+    tv = request.args.get('tv', 0)
+    radio = request.args.get('radio', 0)
+    newspaper = request.args.get('newspaper', 0)
 
-    df = sql_query('''SELECT * FROM datos''')
-    
-    X = df.drop(columns=['sales'])
+    if tv is 0 or radio is 0 or newspaper is 0:
+        return 'Los datos introducidos no son correctos. Introduzca nuevos datos para realizar la prediccion'
 
-    prediction = model.predict(X)
+    else:
+        predictions = my_model.predict([[tv, radio, newspaper]])
 
-    return str(prediction)
+    # return de predictions
+    return str(predictions)
     
 
 
-# 2. Crea un endpoint que reentrene de nuevo el modelo con los datos disponibles en la carpeta data, que guarde ese modelo reentrenado, devolviendo en la respuesta la media del MAE de un cross validation con el nuevo modelo
-# @app.route('/v1/retrain', methods=['PUT'])
-# def retrain():
-#     df = pd.read_csv('data/Advertising.csv', index_col=0)
-#     X = df.drop(columns=['sales'])
-#     y = df['sales']
+# 2. Un endpoint para almacenar nuevos registros en la base de datos que deberá estar previamente creada. (/ingest_data)
+@app.route('/ingest_data', methods=['POST'])
+def ingest_data():
 
-#     model = pickle.load(open('data/advertising_model','rb'))
-#     model.fit(X,y)
-#     pickle.dump(model, open('data/advertising_model_v1','wb'))
+    connection = sqlite3.connect('advertising.db')
+    cursor = connection.cursor()
 
-#     scores = cross_val_score(model, X, y, cv=10, scoring='neg_mean_absolute_error')
+    query = '''
+    INSERT INTO datos
+    (TV, radio, newspaper, sales)
+    VALUES (?,?,?,?)
+    '''
+    tv = request.args.get('tv', 0)
+    radio = request.args.get('radio', 0)
+    newspaper = request.args.get('newspaper', 0)
+    sales = request.args.get('sales', 0)
 
-#     return "New model retrained and saved as advertising_model_v1. The results of MAE with cross validation of 10 folds is: " + str(abs(round(scores.mean(),2)))
+    cursor.execute(query, (tv, radio, newspaper, sales)).fetchall()
 
 
-# app.run() ## NO SE USA PARA PYTHON ANYWHERE
+# app.run() ## NO SE USA PARA PYTHON_ANYWHERE
