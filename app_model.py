@@ -19,7 +19,7 @@ def hello():
 @app.route('/predict', methods=['GET'])
 def predict():
     # cargamos el modelo
-    my_model = pickle.load(open('data.advertising_model', 'rb')) # SE PUEDE METER EN LA MISMA LINEA
+    my_model = pickle.load(open('data/advertising_model', 'rb')) # SE PUEDE METER EN LA MISMA LINEA
 
     # convertimos los datos de la llamada en test
     tv = request.args.get('tv', 0)
@@ -32,14 +32,19 @@ def predict():
     else:
         predictions = my_model.predict([[tv, radio, newspaper]])
 
-    # return de predictions
-    return str(predictions)
+        return str(predictions)
+    
     
 
 
 # 2. Un endpoint para almacenar nuevos registros en la base de datos que deberá estar previamente creada. (/ingest_data)
 @app.route('/ingest_data', methods=['POST'])
 def ingest_data():
+
+    tv = request.args.get('tv', 0)
+    radio = request.args.get('radio', 0)
+    newspaper = request.args.get('newspaper', 0)
+    sales = request.args.get('sales', 0)
 
     connection = sqlite3.connect('advertising.db')
     cursor = connection.cursor()
@@ -49,12 +54,54 @@ def ingest_data():
     (TV, radio, newspaper, sales)
     VALUES (?,?,?,?)
     '''
-    tv = request.args.get('tv', 0)
-    radio = request.args.get('radio', 0)
-    newspaper = request.args.get('newspaper', 0)
-    sales = request.args.get('sales', 0)
 
     cursor.execute(query, (tv, radio, newspaper, sales)).fetchall()
+    connection.commit()
 
 
-# app.run() ## NO SE USA PARA PYTHON_ANYWHERE
+    return 'Has añadido los siguientes datos ' + str(tv) + ', ' + str(radio) + ', ' + str(newspaper) + ', ' + str(sales)
+
+
+# 2b. Imprimir la base de datos por pantalla para comprobar el ejercicio anterior
+@app.route('/print_db', methods=['GET'])
+def print_db():
+
+    connection = sqlite3.connect('advertising.db')
+    cursor = connection.cursor()
+
+    query = '''
+    SELECT * FROM datos
+    '''
+
+    result = cursor.execute(query).fetchall()
+    connection.commit()
+
+
+    return jsonify(result)
+
+# 3. Posibilidad de reentrenar de nuevo el modelo con los posibles nuevos registros que se recojan. (/retrain)
+@app.route('/retrain', methods=['GET'])
+def retrain():
+
+    def sql_query(query):
+        connection = sqlite3.connect('advertising.db')
+        cursor = connection.cursor()
+        cursor.execute(query)
+        ans = cursor.fetchall()
+        names = [description[0] for description in cursor.description]
+
+        return pd.DataFrame(ans,columns=names)
+    df = sql_query('''SELECT * FROM datos''')
+
+    print(df)
+
+    X = df.drop(columns=['sales'])
+    y = df['sales']
+
+    model = pickle.load(open('data/advertising_model','rb'))
+    model.fit(X,y)
+
+    pickle.dump(model, open('data/advertising_model_v1','wb'))
+
+    return print('Has reentrenado el modelo con últimos datos añadidos. \n\nCaracterísticas del modelo: ' + str(model))
+
