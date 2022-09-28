@@ -4,6 +4,7 @@ import pickle
 from sklearn.model_selection import cross_val_score
 import pandas as pd
 import sqlite3
+import datetime
 
 
 os.chdir(os.path.dirname(__file__))
@@ -102,7 +103,7 @@ def retrain():
     model = pickle.load(open('data/advertising_model','rb'))
     model.fit(X,y)
 
-    pickle.dump(model, open('advertising_model_retrain','wb'))
+    pickle.dump(model, open('data/advertising_model_retrain' + datetime.now().strftime("%Y%m%d-%H%M%S"),'wb'))
 
     return 'Has reentrenado el modelo con últimos datos añadidos. \n\nCaracterísticas del modelo: ' + str(model)
 
