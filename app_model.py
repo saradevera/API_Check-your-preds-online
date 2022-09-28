@@ -41,7 +41,8 @@ def predict():
 
 
 # 2. Un endpoint para almacenar nuevos registros en la base de datos que deberá estar previamente creada. (/ingest_data)
-@app.route('/ingest_data', methods=['POST'])
+# @app.route('/ingest_data', methods=['POST']) # NO FUNCIONA CON POST EN python_anywhere
+@app.route('/ingest_data', methods=['GET'])
 def ingest_data():
 
     tv = request.args.get('tv', 0)
@@ -61,7 +62,7 @@ def ingest_data():
     cursor.execute(query, (tv, radio, newspaper, sales)).fetchall()
     connection.commit()
 
-    return 'Has añadido los siguientes datos ' + str(tv) + ', ' + str(radio) + ', ' + str(newspaper) + ', ' + str(sales)
+    return 'Has añadido los siguientes datos, ' + 'en TV \U0001F4FA:' + str(tv) + ', ' + 'en radio \U0001F4FB:' + str(radio) + ', ' + 'en periódico \U0001F4F0:' + str(newspaper) + ', ' + 'y en ventas \U0001F4B8:' + str(sales)
 
 
 # 2b. Imprimir la base de datos por pantalla para comprobar el ejercicio anterior
