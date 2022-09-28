@@ -33,7 +33,9 @@ def predict():
     else:
         predictions = my_model.predict([[tv, radio, newspaper]])
 
-        return str(predictions)
+        predictions_red = round(predictions[0], 2)
+
+        return ' \U0001F4B0 La predicción de ventas según los datos introducidos es: ' + str(predictions_red) + ' €'
     
     
 
@@ -58,7 +60,6 @@ def ingest_data():
 
     cursor.execute(query, (tv, radio, newspaper, sales)).fetchall()
     connection.commit()
-
 
     return 'Has añadido los siguientes datos ' + str(tv) + ', ' + str(radio) + ', ' + str(newspaper) + ', ' + str(sales)
 
@@ -89,13 +90,12 @@ def retrain():
         cursor = connection.cursor()
         cursor.execute(query)
         ans = cursor.fetchall()
-
         names = [description[0] for description in cursor.description]
-        connection.commit()
 
         return pd.DataFrame(ans,columns=names)
-
     df = sql_query('''SELECT * FROM datos''')
+
+    print(df)
 
     X = df.drop(columns=['sales'])
     y = df['sales']
@@ -103,7 +103,10 @@ def retrain():
     model = pickle.load(open('data/advertising_model','rb'))
     model.fit(X,y)
 
-    pickle.dump(model, open('data/advertising_model_retrain' + datetime.now().strftime("%Y%m%d-%H%M%S"),'wb'))
+    nombre_modelo = 'data/advertising_retrain_mod' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-    return 'Has reentrenado el modelo con últimos datos añadidos. \n\nCaracterísticas del modelo: ' + str(model)
+    # pickle.dump(model, open('data/advertising_model_retrain' + datetime.now().strftime("%Y%m%d-%H%M%S"),'wb'))
+    pickle.dump(model, open(nombre_modelo,'wb'))
+
+    return 'Has reentrenado \U0001F4AA el modelo con últimos datos añadidos. \n\nCaracterísticas del modelo: ' + str(model)
 
