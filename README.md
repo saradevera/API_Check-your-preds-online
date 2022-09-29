@@ -4,4 +4,4 @@ Creada a partir de un modelo de regresión que predice las ventas generadas segu
 
 Asociado a una base de datos existente, la cual podemos tanto consultar, como añadir nuevos registros a través de la propia API.
 
-Check aquí ⏩ saradevera.pythonanywhere.com
+Check aquí ⏩ https://saradevera.pythonanywhere.com
