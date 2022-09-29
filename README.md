@@ -1,4 +1,4 @@
-🔶 API disponible para consulta online desde cualquier pc.
+🔶 **API disponible para consulta online desde cualquier pc.
 
 Creada a partir de un modelo de regresión que predice las ventas generadas segun distintos ingresos en publicidad.
 
